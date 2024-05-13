@@ -28,7 +28,7 @@ html {
   --sidebar-transition-verical: 0.1s cubic-bezier(.77,.04,.18,1.03);
   --leaflet-cont-transition: 0.35s cubic-bezier(.77,.04,.18,1.03);
   --sidebar-text-size: 16px;
-  --stroke-weight: 1.5px;
+  --stroke-weight: 1px;
   --dark: rgb(23, 23, 23);
   --light: rgb(255, 255, 255);
 }

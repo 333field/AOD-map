@@ -16,12 +16,12 @@ export const icon = new Icon({
 });
 
 export const selectedIcon = new Icon({
-  iconUrl: "/orreddot.svg",
+  iconUrl: "./orreddot.svg",
   iconSize: [18, 18]
 });
 
 export const recentlySelectedIcon = new Icon({
-  iconUrl: "/graydot.svg",
+  iconUrl: "./graydot.svg",
   iconSize: [18, 18]
 });
 
