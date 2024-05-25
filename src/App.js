@@ -9,6 +9,7 @@ import Sidebar from "./components/sidebar";
 import { useWindowSize } from "usehooks-ts";
 import glify from "leaflet.glify";
 import { GlifyPoints } from 'react-leaflet-glify';
+import { BrowserRouter, useSearchParams } from "react-router-dom";
 
 export const icon = new Icon({
   iconUrl: "/blackdot.svg",
@@ -44,8 +45,8 @@ function MapController({ activeLatLong, centerOnMarker, setCenterOnMarker, marke
   var xb = map.latLngToContainerPoint(currCenter).x + window.innerWidth / 4;
   var yb = map.latLngToContainerPoint(currCenter).y
   var point = map.containerPointToLatLng([x, y])
-  var pointb = map.containerPointToLatLng([xb,yb])
-  if(width < 1000){
+  var pointb = map.containerPointToLatLng([xb, yb])
+  if (width < 1000) {
     map.panTo(activeLtLng, {
       animate: true,
       duration: 0.6,
@@ -60,18 +61,18 @@ function MapController({ activeLatLong, centerOnMarker, setCenterOnMarker, marke
         easeLinearity: 0.25
       })
     } else {
-      if(markerClicked){
+      if (markerClicked) {
         map.setMaxBounds([[-300, -400], [90, 300]])
       }
-      map.panTo(point, { 
-        animate: true, 
+      map.panTo(point, {
+        animate: true,
         duration: 0.6,
         easeLinearity: 0.25
       })
     }
   }
-    
-  
+
+
   return null
 }
 
@@ -155,6 +156,99 @@ export default function App() {
     }, 2000);
   }, []);
 
+  //get load building from link
+  let [searchParams, setSearchParams] = useSearchParams();
+  let building = searchParams.get("building");
+  console.log(building)
+
+  useEffect(() => {
+    if (building) {
+      const buildingData = buildings.features.find(buildingData => buildingData.Text1 === building);
+      setActiveMarkerTitle(buildingData.Text1);
+      setActiveLatlong({
+        lat: buildingData.latitude,
+        long: buildingData.longitude
+      })
+      const links2 = [];
+      const links = buildings.features.map(build => {
+        if (build.Text1 === buildingData.Text1 && build.Image_URL != "") {
+          var tags;
+          var date;
+          var notes
+          var desc;
+          var pageurl = build.Page_URL === "" ? build.Page_URL1 : build.Page_URL;
+          if (build.Text === "") {
+            tags = "";
+            date = lastPostDate;
+            notes = "";
+            desc = "";
+
+          } else {
+            const splitTags = build.Text.split("Tags:");
+            const splitNotes = build.Text.substring(14, 30).split("notes");
+            const splitDesc = build.Text.split("notes")[1].split("Tags:")[0].split("View this on the map");
+            tags = splitTags[1];
+            date = build.Text.substring(0, 14);
+            notes = splitNotes[0];
+            desc = splitDesc[0];
+            setLastPostDate(date);
+          }
+
+          if (build.Text === "") {
+            links2.push({
+              link: build.Multiple_Images_URL,
+              desc: "",
+              tags: "",
+              date: "",
+              notes: "",
+              pageurl: pageurl
+            })
+          } else {
+            if (build.Multiple_Images_URL === "") {
+              links2.push({
+                link: build.Single_Image_URL,
+                tags: tags,
+                date: date,
+                notes: notes,
+                desc: "desc:" + desc,
+                pageurl: pageurl
+              })
+            } else {
+              links2.push({
+                link: build.Multiple_Images_URL,
+                tags: tags,
+                date: date,
+                notes: notes,
+                desc: "desc: " + desc,
+                pageurl: pageurl
+              })
+            }
+          }
+          return null
+        }
+      })
+      const uniqueLinks = [...new Map(links2.map((m) => [m.link, m])).values()];
+
+      setMarkerClicked(true)
+      setSidebarLoading(false)
+      setCenterOnMarker(false)
+      setActiveMarkerInfo(uniqueLinks)
+      setSidebarWidth("sidebar")
+      setRecentMarkerLat(activeMarkerLat)
+      setRecentMarkerLat(activeMarkerLng)
+      setActiveMarkerLat(Number(buildingData.latitude))
+      setActiveMarkerLng(Number(buildingData.longitude))
+
+      document.documentElement.style.setProperty('--show-content', "hidden")
+      document.documentElement.style.setProperty('--show-loading', "flex")
+      const sidebarDiv = document.getElementsByClassName('sidebar')[0];
+      
+    }
+  }, []);
+
+
+
+
   return (
     <>
       {isLoading ? (
@@ -162,36 +256,36 @@ export default function App() {
           overflow: "hidden"
         }}>
 
-<div className="header">
-          <span className="header-text-small">ARCHITECTURE OF <br></br>DOOM</span>
-          <span className="header-text-small-small">ARCHITECTURE OF <br></br>DOOM</span>
+          <div className="header">
+            <span className="header-text-small">ARCHITECTURE OF <br></br>DOOM</span>
+            <span className="header-text-small-small">ARCHITECTURE OF <br></br>DOOM</span>
             <div className="header-text-container">
-                <div className="header-links">
-                  <span className="header-link" onClick={() => {
-                      window.open("https://architectureofdoom.tumblr.com", "_self")
-                  }}>  
+              <div className="header-links">
+                <span className="header-link" onClick={() => {
+                  window.open("https://architectureofdoom.tumblr.com", "_self")
+                }}>
                   <u> tumblr </u>  </span>
-                  <span className="header-link" onClick={() => {
-                      window.open("https://architectureofdoom.tumblr.com/archive", "_self")
-                  }}> 
+                <span className="header-link" onClick={() => {
+                  window.open("https://architectureofdoom.tumblr.com/archive", "_self")
+                }}>
                   <u> archive  </u></span>
-                </div>
-                <div className="header-icon"></div>
+              </div>
+              <div className="header-icon"></div>
             </div>
           </div>
           <div className="header-links-small">
-                  <span className="header-link" onClick={() => {
-                      window.open("https://architectureofdoom.tumblr.com", "_self")
-                  }}>  
-                  <u> tumblr </u>  </span>
-                  <span className="header-link" onClick={() => {
-                      window.open("https://architectureofdoom.tumblr.com/archive", "_self")
-                  }}> 
-                  <u> archive  </u></span>
+            <span className="header-link" onClick={() => {
+              window.open("https://architectureofdoom.tumblr.com", "_self")
+            }}>
+              <u> tumblr </u>  </span>
+            <span className="header-link" onClick={() => {
+              window.open("https://architectureofdoom.tumblr.com/archive", "_self")
+            }}>
+              <u> archive  </u></span>
           </div>
 
           <div className={`line ${markerClicked ? 'active' : ''}`}></div>
-        
+
           <MapContainer className={mapPosition} center={[50.142255, 8.671575]}
             zoom={2.7}
             maxBounds={[[-300, -260], [90, 260]]}
@@ -245,7 +339,7 @@ export default function App() {
                 }
               }}
             ></Marker>
-             
+
             {uniqueBuildings.map(building => (
               <CircleMarker
                 center={[Number(building.latitude), Number(building.longitude)]}
@@ -270,12 +364,12 @@ export default function App() {
                     const links2 = [];
                     const links = buildings.features.map(build => {
                       if (build.Text1 === building.Text1 && build.Image_URL != "") {
-                        var tags; 
+                        var tags;
                         var date;
                         var notes
                         var desc;
                         var pageurl = build.Page_URL === "" ? build.Page_URL1 : build.Page_URL;
-                        if (build.Text === ""){
+                        if (build.Text === "") {
                           tags = "";
                           date = lastPostDate;
                           notes = "";
@@ -291,20 +385,20 @@ export default function App() {
                           desc = splitDesc[0];
                           setLastPostDate(date);
                         }
-                          
-                         
-                        
-                        if(build.Text === ""){
+
+
+
+                        if (build.Text === "") {
                           links2.push({
-                              link: build.Multiple_Images_URL,
-                              desc: "",
-                              tags: "",
-                              date: "",
-                              notes: "",
-                              pageurl: pageurl
+                            link: build.Multiple_Images_URL,
+                            desc: "",
+                            tags: "",
+                            date: "",
+                            notes: "",
+                            pageurl: pageurl
                           })
                         } else {
-                          if(build.Multiple_Images_URL === ""){
+                          if (build.Multiple_Images_URL === "") {
                             links2.push({
                               link: build.Single_Image_URL,
                               tags: tags,
@@ -321,13 +415,14 @@ export default function App() {
                               notes: notes,
                               desc: "desc: " + desc,
                               pageurl: pageurl
-                          })
+                            })
                           }
                         }
                         return null
                       }
                     })
                     const uniqueLinks = [...new Map(links2.map((m) => [m.link, m])).values()];
+
                     setMarkerClicked(true)
                     setSidebarLoading(false)
                     setCenterOnMarker(false)
@@ -337,11 +432,14 @@ export default function App() {
                     setRecentMarkerLat(activeMarkerLng)
                     setActiveMarkerLat(Number(building.latitude))
                     setActiveMarkerLng(Number(building.longitude))
+
+                    setSearchParams({ building: building.Text1 })
+
                     document.documentElement.style.setProperty('--show-content', "hidden")
                     document.documentElement.style.setProperty('--show-loading', "flex")
                     const sidebarDiv = document.getElementsByClassName('sidebar')[0];
                     sidebarDiv.scrollTo({
-                    top: 0,
+                      top: 0,
                     });
                   },
                 }}
