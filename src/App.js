@@ -159,7 +159,6 @@ export default function App() {
   //get load building from link
   let [searchParams, setSearchParams] = useSearchParams();
   let building = searchParams.get("building");
-  console.log(building)
 
   useEffect(() => {
     if (building) {
@@ -242,7 +241,7 @@ export default function App() {
       document.documentElement.style.setProperty('--show-content', "hidden")
       document.documentElement.style.setProperty('--show-loading', "flex")
       const sidebarDiv = document.getElementsByClassName('sidebar')[0];
-      
+
     }
   }, []);
 
@@ -352,7 +351,6 @@ export default function App() {
                 eventHandlers={{
                   click: (e) => {
                     // mark current marker
-                    console.log('marker clicked')
 
                     moveMapPosition("leaflet-container-moved")
 
@@ -428,10 +426,10 @@ export default function App() {
                     setCenterOnMarker(false)
                     setActiveMarkerInfo(uniqueLinks)
                     setSidebarWidth("sidebar")
-                    setRecentMarkerLat(activeMarkerLat)
-                    setRecentMarkerLat(activeMarkerLng)
                     setActiveMarkerLat(Number(building.latitude))
                     setActiveMarkerLng(Number(building.longitude))
+                    setRecentMarkerLat(Number(building.latitude))
+                    setRecentMarkerLng(Number(building.longitude))
 
                     setSearchParams({ building: building.Text1 })
 
